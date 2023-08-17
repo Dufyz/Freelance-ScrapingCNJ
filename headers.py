@@ -1,0 +1,1 @@
+LINK_MAIN = "https://www.cnj.jus.br/corregedoria/justica_aberta/?"
