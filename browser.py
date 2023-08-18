@@ -10,7 +10,7 @@ PATH_DESKTOP = str(Path.home()) + "\Desktop"
 browser = webdriver.Chrome()
 
 browser.headless = True 
-wait = WebDriverWait(browser, 3)
+wait = WebDriverWait(browser, 2)
 
 def getBrowserDriver():
     browser.get(LINK_MAIN)
