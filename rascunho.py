@@ -1,23 +1,36 @@
-# Pagina Mapa
+try:
+                pagina = 1
+                while True:
+                    if pagina > 1:
+                        clickable_element = waiter.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='display_next']")))
+                        clickable_element.click()
 
-# Selecionando estados
-el_mapa_ufs_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/fieldset/map')))
-el_mapa_ufs = el_mapa_ufs_geral.find_elements(By.TAG_NAME, "area")
+                    el_100 = waiter.until(EC.presence_of_element_located((By.XPATH, '//*[@id="display_length"]/label/select/option[4]')))
+                    el_100.click()
 
-# for uf in el_mapa_ufs[1:]:
-#     area.click()
-#     time.sleep(2)
-el_mapa_ufs[-10].click()
+                    el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
+                    el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
 
-# Selecionando municipios
-el_mapa_muns_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="cidade_serventia"]')))
-el_mapa_muns = el_mapa_muns_geral.find_elements(By.TAG_NAME, "option")
+                    for info in el_infos:
+                        info.click()
+                        try:
+                            info.click()
+                        except StaleElementReferenceException:
+                            pass
 
-# for mun in el_mapa_muns[1:]:
-#     mun.click()
-#     time.sleep(2)
-el_mapa_muns[19].click()
+                        # Realize ação getDados() para obter os dados
+                        nova_linha_df = getDados()
+                        df = pd.concat([df, nova_linha_df], ignore_index=True)
 
-# Pesquisar
-el_pesquisar = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="div_cidade"]/div/table/tbody/tr[2]/td/button[1]')))
-el_pesquisar.click()
+                        # browser.back()
+
+                    try:
+                        clickable_element = waiter.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='display_next']")))
+                        clickable_element.click()
+                        
+                        pagina += 1
+                    except Exception as e:
+                        break
+
+            except Exception as e:
+                error = True
