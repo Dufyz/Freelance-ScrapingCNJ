@@ -4,9 +4,6 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from headers import LINK_MAIN
 
-# Criando folders que serão utilizados para salvar os arquivos
-PATH_DESKTOP = str(Path.home()) + "\Desktop"
-
 browser = webdriver.Chrome()
 
 browser.headless = True 

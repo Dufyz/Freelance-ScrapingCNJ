@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import time
 
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import  NoSuchElementException
@@ -16,23 +17,6 @@ el_extrajudicial.click()
 
 el_serventias_extrajudicial = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/div/div/div/ul/li[2]/ul/li[1]/a')))
 el_serventias_extrajudicial.click()
-
-# Criando dataframe
-data = {
-    'Denominacao': [""],
-    'Situacao': [""],
-    'Atribuicoes': [""],
-    'Responsavel': [""],
-    'Substituto': [""],
-    'UF': [""],
-    'Municipio': [""],
-    'Telefone Principal': [""],
-    'Telefone Secundario': [""],
-    'Email': [""],
-}
-
-df = pd.DataFrame(data)
-
 
 def getEstados():
     el_mapa_ufs_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/fieldset/map')))
@@ -166,91 +150,94 @@ def getDados():
     return nova_linha_df
 
 # Pagina Mapa
-error = False
-el_mapa_ufs = getEstados()
 
 # Selecionando estados
-for uf in range(1, 27):
+def processo(uf, dataframe):
+    error = False
     num = 1
     while(True):
-        el_mapa_ufs = getEstados()
-        el_mapa_ufs[uf].click()
-        el_mapa_muns = getMunicipios()
-        el_mapa_muns[num].click()
-
-        browser.implicitly_wait(3)
-        el_pesquisar = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="div_cidade"]/div/table/tbody/tr[2]/td/button[1]')))
-        el_pesquisar.click()
-
-        # Pagina Cartorios
-        # Selecionando x quantidade de dados em um municipio
         try:
-            el_qntd_pag = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display_paginate"]/span')))
-            el_pags = el_qntd_pag.find_elements(By.TAG_NAME, 'a')
-            qnt_pags = len(el_pags)
+            el_mapa_ufs = getEstados()
+            el_mapa_ufs[uf].click()
+            el_mapa_muns = getMunicipios()
+            el_mapa_muns[num].click()
 
-            if(len(el_pags) == 1):
-                el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
-                el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
+            browser.implicitly_wait(3)
+            el_pesquisar = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="div_cidade"]/div/table/tbody/tr[2]/td/button[1]')))
+            el_pesquisar.click()
 
-                for info in range(0, len(el_infos)):
-                    el_infos[info].click()
-                    try:
-                        el_infos[info].click()
-                    except StaleElementReferenceException:
-                        pass
-
-                    browser.implicitly_wait(1)
-                    nova_linha_df = getDados()
-                    df = pd.concat([df, nova_linha_df], ignore_index=True)  # Concatenate DataFrames
-
-                    browser.back()
-                    browser.implicitly_wait(1)
-
-                    el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
-                    el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
-
-            elif(qnt_pags > 1):
-                el_last_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="display_last"]')))
-                el_last_pg.click()
+            # Pagina Cartorios
+            # Selecionando x quantidade de dados em um municipio
+            try:
                 el_qntd_pag = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display_paginate"]/span')))
                 el_pags = el_qntd_pag.find_elements(By.TAG_NAME, 'a')
-                qnt_pags = int(el_pags[-1].text)
-                el_first_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="display_first"]')))
-                el_first_pg.click()
+                qnt_pags = len(el_pags)
 
-                info = 0
-                pagina_atual = 1
-                while True:
+                if(len(el_pags) == 1):
                     el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
                     el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
 
-                    # for info in range(0, len(el_infos)):
-                    el_infos[info].click()
-                    try:
+                    for info in range(0, len(el_infos)):
                         el_infos[info].click()
-                    except StaleElementReferenceException:
-                        pass
+                        try:
+                            el_infos[info].click()
+                        except StaleElementReferenceException:
+                            pass
+
+                        browser.implicitly_wait(1)
+                        nova_linha_df = getDados()
+                        dataframe = pd.concat([dataframe, nova_linha_df], ignore_index=True)  # Concatenate DataFrames
+
+                        browser.back()
+                        browser.implicitly_wait(1)
+
+                        el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
+                        el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
+
+                elif(qnt_pags > 1):
+                    el_last_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="display_last"]')))
+                    el_last_pg.click()
+                    el_qntd_pag = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display_paginate"]/span')))
+                    el_pags = el_qntd_pag.find_elements(By.TAG_NAME, 'a')
+                    qnt_pags = int(el_pags[-1].text)
+                    el_first_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="display_first"]')))
+                    el_first_pg.click()
+
+                    info = 0
+                    pagina_atual = 1
+                    while True:
+                        el_infos_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="display"]/tbody')))
+                        el_infos = el_infos_geral.find_elements(By.TAG_NAME, 'a')
+
+                        # for info in range(0, len(el_infos)):
+                        el_infos[info].click()
+                        try:
+                            el_infos[info].click()
+                        except StaleElementReferenceException:
+                            pass
+                            
+                        browser.implicitly_wait(1)
+                        nova_linha_df = getDados()
+                        dataframe = pd.concat([dataframe, nova_linha_df], ignore_index=True)  # Concatenate DataFrames
+                        info+=1
+
+                        if(info == 9):
+                            info = 0
+                            pagina_atual += 1
+
+                        browser.back()
+                        browser.implicitly_wait(1)
+                        temp = 1 # veriricar
+                        while temp < pagina_atual:
+                            el_next_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='display_next']")))
+                            el_next_pg.click()
+                            temp+= 1
                         
-                    browser.implicitly_wait(1)
-                    nova_linha_df = getDados()
-                    df = pd.concat([df, nova_linha_df], ignore_index=True)  # Concatenate DataFrames
-                    info+=1
+                        if (pagina_atual == qnt_pags):
+                            break
 
-                    if(info == 9):
-                        info = 0
-                        pagina_atual += 1
-
-                    browser.back()
-                    browser.implicitly_wait(1)
-                    temp = 1 # veriricar
-                    while temp < pagina_atual:
-                        el_next_pg = waiter.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='display_next']")))
-                        el_next_pg.click()
-                        temp+= 1
-                    
-                    if (pagina_atual == qnt_pags):
-                        break
+            except:
+                error = True
 
             # Resetando para conseguir clicar novamente
             browser.back()
@@ -259,6 +246,7 @@ for uf in range(1, 27):
             if(error):
                 el_serventias_extrajudicial = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/div/div/div/ul/li[2]/ul/li[1]/a')))
                 el_serventias_extrajudicial.click()
+                time.sleep(2)
 
             browser.implicitly_wait(1)
             error = False
@@ -269,6 +257,6 @@ for uf in range(1, 27):
 
         if(num == len(el_mapa_muns)):
             break
-
-df = df.drop(index = 0)
-df.to_excel("coleta_de_dados.xlsx")
+        
+    browser.close()
+    return dataframe
