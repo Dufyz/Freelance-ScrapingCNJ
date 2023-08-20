@@ -25,7 +25,7 @@ def getEstados():
     return el_mapa_ufs
 
 def getMunicipios():
-    el_mapa_muns_geral = waiter.until(EC.presence_of_element_located((By.XPATH, r'//*[@id="cidade_serventia"]')))
+    el_mapa_muns_geral = waiter.until(EC.visibility_of_element_located((By.XPATH, r'//*[@id="cidade_serventia"]')))
     el_mapa_muns = el_mapa_muns_geral.find_elements(By.TAG_NAME, "option")
 
     return el_mapa_muns
@@ -244,8 +244,11 @@ def processo(uf, dataframe):
             browser.back()
 
             if(error):
-                el_serventias_extrajudicial = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/div/div/div/ul/li[2]/ul/li[1]/a')))
-                el_serventias_extrajudicial.click()
+                try:
+                    el_serventias_extrajudicial = waiter.until(EC.presence_of_element_located((By.XPATH, r'/html/body/div[2]/div[5]/div/div/div/ul/li[2]/ul/li[1]/a')))
+                    el_serventias_extrajudicial.click()
+                except:
+                    ...
                 time.sleep(2)
 
             browser.implicitly_wait(1)

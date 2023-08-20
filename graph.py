@@ -34,7 +34,7 @@ def execute_main():
 # Lista de estados do Brasil
 states = [
     "RS", "SC", "PR", "SP", "RJ", "ES", "MG", "BA",
-    "SE", "AL INDISPONIVEL", "PE INDISPONIVEL", "PB INDISPONIVEL", "RN INDISPONIVEL", "CE",
+    "SE", "AL", "PE", "PB", "RN", "CE",
     "PI", "MA", "TO", "GO", "DF", "MS", "MT",
     "RO", "PA", "RR", "AM", "AC", "AP"
 ]
