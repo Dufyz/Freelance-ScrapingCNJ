@@ -150,15 +150,15 @@ def getDados():
     return nova_linha_df
 
 # Pagina Mapa
-
 # Selecionando estados
+
 def processo(uf, dataframe):
     error = False
     num = 1
     while(True):
         try:
             el_mapa_ufs = getEstados()
-            el_mapa_ufs[uf].click()
+            browser.execute_script("arguments[0].click();", el_mapa_ufs[uf])
             el_mapa_muns = getMunicipios()
             el_mapa_muns[num].click()
 
