@@ -88,7 +88,7 @@ def getDados():
         telefone_secundario = None
 
     try:
-        email = browser.find_element(By.XPATH, '/html/body/div[2]/div[5]/fieldset[4]/table/tbody/tr[7]/td[2]').text
+        email = browser.find_element(By.XPATH, '/html/body/div[2]/div[5]/fieldset[4]/table/tbody/tr[8]/td[2]').text
     except NoSuchElementException:
         email = None
 
